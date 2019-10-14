@@ -1,0 +1,113 @@
+import { LogArguments, LogConfig, defaultArguments, defaultConfig, Level, Category, Foramt } from './constant'
+import { logTag } from './format'
+import { deepMerge } from './util'
+import { Appender, ConsoleAppender } from './appender'
+
+// the log called count
+let count = 1
+
+export default class Logger {
+  private args: LogArguments
+  private config: LogConfig
+  private logAppenders: Appender[] = [new ConsoleAppender()]
+
+  constructor(logArgs: LogArguments = {}, config: LogConfig = {}) {
+    this.args = deepMerge(defaultArguments, logArgs)
+    this.config = deepMerge(defaultConfig, config)
+    this.logWrap = this.logWrap.bind(this)
+    this.logDecorator = this.logDecorator.bind(this)
+    this.init()
+  }
+
+  private init() {
+    const levelConfig = this.config.level as Level
+    Object.keys(levelConfig)
+      .forEach((level) => {
+        if (!this[level]) {
+          this[level] = function(content: unknown = '', args: LogArguments = {}): LogArguments {
+            return this.log(content, { level: levelConfig[level], ...args })
+          }
+        }
+      })
+  }
+
+  private print(printFields: LogArguments = {}): void {
+    this.logAppenders.forEach((appender) => {
+      appender.print(printFields)
+    })
+  }
+
+  setAppender(appenderList: Appender[] = []) {
+    this.logAppenders = appenderList
+  }
+  
+  log(content: string | unknown = '', logArgs: LogArguments = {}): LogArguments {
+    const logFields: LogArguments = {
+      level: (this.config.level as Level).info,
+      ...this.args,
+      ...logArgs,
+      timeStamp: Date.now(),
+      count,
+      content,
+    }
+    
+    if (this.config.printLevel && this.config.printLevel.includes[(this.config.level as Level)[logFields.level]]) {
+      try {
+        const logContent = (this.config.format as Foramt)(logFields)
+        this.print({ ...logFields, logContent })
+      } catch (err) {
+        console.error(`something wrong in log: ${err}`)
+      }
+      count += 1
+      return logFields
+    }
+    return {}    
+  }
+
+  debug(content: unknown = '', args: LogArguments = {}): LogArguments {
+    return this.log(content, { level: (this.config.level as Level).debug, ...args })
+  }
+
+  info(content: unknown = '', args: LogArguments = {}): LogArguments {
+    return this.log(content, { level: (this.config.level as Level).info, ...args })
+  }
+
+  warn(content: unknown = '', args: LogArguments = {}): LogArguments {
+    return this.log(content, { level: (this.config.level as Level).warn, ...args })
+  }
+
+  error(error: Error | any, args: LogArguments = {}): LogArguments {
+    if (error instanceof Error) {
+      const { name = '', message = '', stack = '' } = error
+      return this.log(stack, { level: (this.config.level as Level).error, errType: name, errDesc: message, ...args })
+    }
+    return this.log(error, { level: (this.config.level as Level).error, ...args })
+  }
+
+  logWrap(wrapped: Function | any, logArgs: LogArguments = {}): Function {
+    const _this = this
+    return function (...funArgs: any[]) {
+      const funName = wrapped.name || ''
+      _this.info(logTag`INPUT: ${funArgs}`, { category: (_this.config.category as Category).function, funName, ...logArgs })
+      try {
+        const result = wrapped(...funArgs)
+        _this.info(logTag`OUTPUT: ${funArgs}`, { category: (_this.config.category as Category).function, funName, ...logArgs })
+        return result
+      } catch (err) {
+        _this.error(err, { category: (_this.config.category as Category).function, funName, ...logArgs })
+      }
+    }
+  }
+
+  logDecorator(logArgs: LogArguments = {}) {
+    return (target: Object, name: string, descriptor: PropertyDescriptor) => {
+        const className = target.constructor.name
+      // const funName = name
+      const wrapped = descriptor.value
+      if (wrapped) {
+        descriptor.value = this.logWrap(wrapped, { className, ...logArgs })
+      }
+      return descriptor
+    }
+  }
+}

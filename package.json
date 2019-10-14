@@ -1,0 +1,31 @@
+{
+  "name": "@8pattern/jlogger",
+  "version": "0.1.0",
+  "description": "a tiny log library for JS",
+  "scripts": {
+    "dev": "webpack --mode=development",
+    "build": "webpack --mode=production",
+    "test": "jest"
+  },
+  "keywords": [
+    "log"
+  ],
+  "author": "8th-pattern",
+  "license": "MIT",
+  "main": "./dist/jLogger.js",
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+    "@babel/preset-typescript": "^7.6.0",
+    "@types/jest": "^24.0.18",
+    "babel-loader": "^8.0.6",
+    "clean-webpack-plugin": "^3.0.0",
+    "jest": "^24.9.0",
+    "jest-cli": "^24.9.0",
+    "terser-webpack-plugin": "^2.1.0",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.6.3",
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.9"
+  }
+}
