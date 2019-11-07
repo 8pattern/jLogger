@@ -1,7 +1,7 @@
 import { LogArguments, LogConfig, defaultArguments, defaultConfig, Level, Category, Foramt } from './constant'
 import { logTag } from './format'
 import { deepMerge } from './util'
-import { Appender, ConsoleAppender } from './appender'
+import AppenderManager, { ConsoleAppender } from './appender'
 
 // the log called count
 let count = 1
@@ -9,7 +9,7 @@ let count = 1
 export default class Logger {
   private args: LogArguments
   private config: LogConfig
-  private logAppenders: Appender[] = [new ConsoleAppender()]
+  Appender: AppenderManager = new AppenderManager()
 
   constructor(logArgs: LogArguments = {}, config: LogConfig = {}) {
     this.args = deepMerge(defaultArguments, logArgs)
@@ -29,18 +29,16 @@ export default class Logger {
           }
         }
       })
+
+    this.Appender.set([new ConsoleAppender()])
   }
 
   private print(printFields: LogArguments = {}): void {
-    this.logAppenders.forEach((appender) => {
+    this.Appender.appenders.forEach((appender) => {
       appender.print(printFields)
     })
   }
 
-  setAppender(appenderList: Appender[] = []) {
-    this.logAppenders = appenderList
-  }
-  
   log(content: string | unknown = '', logArgs: LogArguments = {}): LogArguments {
     const logFields: LogArguments = {
       level: (this.config.level as Level).info,
@@ -101,7 +99,7 @@ export default class Logger {
 
   logDecorator(logArgs: LogArguments = {}) {
     return (target: Object, name: string, descriptor: PropertyDescriptor) => {
-        const className = target.constructor.name
+      const className = target.constructor.name
       // const funName = name
       const wrapped = descriptor.value
       if (wrapped) {

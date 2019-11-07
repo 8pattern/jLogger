@@ -1,5 +1,8 @@
-import logger from './logger'
-export default logger
+import Logger from './logger'
+export default Logger
 
-export { logTag, contentLengthFormat, dateformat } from './format'
-export { Appender, ConsoleAppender, FileAppender } from './appender'
+import { logTag, contentLengthFormat, dateformat } from './format'
+export const util = { logTag, contentLengthFormat, dateformat }
+
+import { Appender, ConsoleAppender, FileAppender } from './appender'
+export const appender = { Appender, ConsoleAppender, FileAppender }

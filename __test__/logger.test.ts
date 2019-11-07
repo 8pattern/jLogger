@@ -3,10 +3,10 @@ import Logger from '../src/logger'
 describe('initialize', () => {
   test('default', () => {
     const logger = new Logger()
-    expect(logger['args']).toMatchObject({
-      wid: expect.any(Number),
-      url: expect.any(String),
-    })
+    // expect(logger['args']).toMatchObject({
+    //   wid: expect.any(Number),
+    //   url: expect.any(String),
+    // })
     expect(logger['config']).toMatchObject({
       category: expect.any(Object),
       level: expect.any(Object),
@@ -16,8 +16,8 @@ describe('initialize', () => {
   test('custom arguments', () => {
     const logger = new Logger({ t: 'text', o: { a: 1, b: 2 } })
     expect(logger['args']).toMatchObject({
-      wid: expect.any(Number),
-      url: expect.any(String),
+      // wid: expect.any(Number),
+      // url: expect.any(String),
       t: 'text',
       o: { a: 1, b: 2 },
     })
@@ -29,10 +29,10 @@ describe('initialize', () => {
 
   test('custom config', () => {
     const logger = new Logger({}, { t: 'test' })
-    expect(logger['args']).toMatchObject({
-      wid: expect.any(Number),
-      url: expect.any(String),
-    })
+    // expect(logger['args']).toMatchObject({
+    //   wid: expect.any(Number),
+    //   url: expect.any(String),
+    // })
     expect(logger['config']).toMatchObject({
       category: expect.any(Object),
       level: expect.any(Object),
@@ -119,5 +119,11 @@ describe('log', () => {
   })
 })
 
-describe('print', () => {
+describe('Appender', () => {
+  const logger = new Logger()
+
+  test('Appender: default', () => {
+    expect(logger.Appender).toBeDefined()
+    expect(logger.Appender.appenders.length).toBe(1)
+  })
 })

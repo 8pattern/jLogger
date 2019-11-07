@@ -1,4 +1,4 @@
-import { getRandomNumber } from './util'
+import { getRandomNumber, isNode } from './util'
 
 export interface Category {
   [key: string]: string
@@ -24,7 +24,9 @@ export interface LogConfig {
   [key: string]: any
 }
 
-export const defaultArguments: LogArguments = {
+export const defaultArguments: LogArguments = isNode ? {
+  pid: process.pid,
+} : {
   wid: getRandomNumber(5),
   url: window.location.href.replace(window.location.origin, ''),
 }
