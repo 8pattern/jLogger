@@ -1,6 +1,6 @@
 {
   "name": "@8pattern/jlogger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "a tiny & flexible logger for JS",
   "scripts": {
     "dev": "rollup -c -w --environment NODE_ENV:development",

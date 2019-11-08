@@ -20,7 +20,7 @@ export default {
   input: 'src/index.ts',
   output: {
     file: 'dist/jLogger.js',
-    name: 'jlogger',
+    name: 'jLogger',
     format: 'umd'
   },
   plugins: isProduction ? prodPlugins : devPlugins,

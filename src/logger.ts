@@ -2,6 +2,7 @@ import { LogArguments, LogConfig, defaultArguments, defaultConfig, Level, Catego
 import { logTag } from './format'
 import { deepMerge } from './util'
 import AppenderManager, { ConsoleAppender } from './appender'
+import { Decorator } from '@babel/types'
 
 // the log called count
 let count = 1
@@ -49,7 +50,7 @@ export default class Logger {
       content,
     }
     
-    if (this.config.printLevel && this.config.printLevel.includes[(this.config.level as Level)[logFields.level]]) {
+    if (this.config.printLevel && this.config.printLevel.some(level => (this.config as Level).level[level] === logFields.level)) {
       try {
         const logContent = (this.config.format as Foramt)(logFields)
         this.print({ ...logFields, logContent })
@@ -82,23 +83,24 @@ export default class Logger {
     return this.log(error, { level: (this.config.level as Level).error, ...args })
   }
 
-  logWrap(wrapped: Function | any, logArgs: LogArguments = {}): Function {
+  logWrap(wrapped: Function, logArgs: LogArguments = {}): Function {
     const _this = this
     return function (...funArgs: any[]) {
       const funName = wrapped.name || ''
-      _this.info(logTag`INPUT: ${funArgs}`, { category: (_this.config.category as Category).function, funName, ...logArgs })
+      const category = (_this.config.category as Category).function
+      _this.info(logTag`INPUT: ${funArgs}`, { category, funName, ...logArgs })
       try {
         const result = wrapped(...funArgs)
-        _this.info(logTag`OUTPUT: ${funArgs}`, { category: (_this.config.category as Category).function, funName, ...logArgs })
+        _this.info(logTag`OUTPUT: ${funArgs}`, { category, funName, ...logArgs })
         return result
       } catch (err) {
-        _this.error(err, { category: (_this.config.category as Category).function, funName, ...logArgs })
+        _this.error(err, { category, funName, ...logArgs })
       }
     }
   }
 
   logDecorator(logArgs: LogArguments = {}) {
-    return (target: Object, name: string, descriptor: PropertyDescriptor) => {
+    return (target: Object, name: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
       const className = target.constructor.name
       // const funName = name
       const wrapped = descriptor.value

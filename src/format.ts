@@ -42,10 +42,10 @@ export function logTag(str: TemplateStringsArray, ...key: unknown[]): string {
 
 export function contentLengthFormat(
   content: string,
-  contentLengthLimit?: number,
+  contentLengthLimit: number | null = null,
   replaceString?: string
 ): string {
-  if (contentLengthLimit) {
+  if (contentLengthLimit !== null) {
     const maxContentLength = contentLengthLimit
     const contentLength = content.length
     if (contentLength <= maxContentLength) {
@@ -59,7 +59,7 @@ export function contentLengthFormat(
   return content
 }
 
-export function dateformat(date: Date | number = Date.now(), formatStr: string = 'yyyy-mm-dd HH:MM:ss.l'): string {
+export function dateformat(date: Date | number = new Date(), formatStr: string = 'yyyy-mm-dd HH:MM:ss.l'): string {
   const tDate = (typeof date === 'number') ? new Date(date) : date
   let result = formatStr
   const o = {
